@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Test first page</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+    <body>
+        <script src="https://unpkg.com/mithril/mithril.js"></script>
+        <script>
+            var Hello = {
+	            view: function() {
+	    	    return m("main", [
+                    m("div", {id: "menu"}, m(menu1)),
+	                //m("h1", {class: "title"}, "My first app Mythill"),
+                    //m("button", {class: "btn btn-primary"},"Mon bouton")
+	            ])
+	            }
+	        }
+
+            var menu1 = {
+                view: function() {
+                    return m("menu1", [
+                    m("nav", {class: "navbar navbar-light bg-light"}, 
+                        m("a", {class: "navbar-brand"}, "TinyPet"),
+                        m("form", {class: "form-inline"},
+                            m("button", {class: "btn btn-link my-2 my-sm-0"}, "Créer"),
+                            m("button", {class: "btn btn-primary my-2 my-sm-0"},"Mon compte"))),
+                    ])
+                }
+            }
+
+            var menu2 = {
+                view: function() {
+                    return m("menu2", [
+                    m("nav", {class: "navbar navbar-light bg-light"}, 
+                        m("a", {class: "navbar-brand"}, "TinyPet"),
+                        m("form", {class: "form-inline"},
+                            m("button", {class: "btn btn-primary my-2 my-sm-0"},"Connexion"))),
+                    ])
+                }
+            }
+
+            m.mount(document.body, Hello)
+        </script>
+    </body>
+</html>
