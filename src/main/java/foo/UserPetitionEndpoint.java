@@ -1,0 +1,119 @@
+package foo;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import com.google.api.server.spi.config.Api;
+import com.google.api.server.spi.config.ApiMethod;
+import com.google.api.server.spi.config.ApiMethod.HttpMethod;
+import com.google.api.server.spi.config.Named;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.users.User;
+
+@Api(name = "cloud")
+public class UserPetitionEndpoint {
+	
+	public UserPetitionEndpoint() {}
+	
+	@ApiMethod(
+	        path = "user/get/{email}/{auth}",
+	        httpMethod = HttpMethod.GET
+	    )
+	public User getUser(@Named("email") String email, @Named("auth") String auth) {
+		return new User(email, auth);
+	}
+	
+	
+	public List<Entity> queryForge(DatastoreService datastore, String pseudo){
+		        
+		Filter filter = new FilterPredicate("pseudo", FilterOperator.EQUAL, pseudo);
+		Query query = new Query("UserCloud").setFilter(filter);
+		PreparedQuery prepQuery = datastore.prepare(query);
+		List<Entity> results = prepQuery.asList(FetchOptions.Builder.withDefaults());
+		
+		return results;
+		
+	}
+	
+	
+	@ApiMethod(
+	        path = "user/getCloud/{pseudo}",
+	        httpMethod = HttpMethod.GET
+	    )
+	public UserPetition getUserPet(@Named("pseudo") String pseudo) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		List<Entity> results = queryForge(datastore, pseudo);
+		
+		if(results.size()>0) {
+			Entity e = results.get(0);
+			UserPetition uc = new UserPetition((String)e.getProperty("pseudo"));
+			uc.setListPetitions((ArrayList<String>)e.getProperty("listPetitions"));
+			return uc;
+		}
+		
+		return null;				
+	}
+	
+	@ApiMethod(
+	        path = "user/create",
+	        httpMethod = HttpMethod.POST
+	    )
+	public User createUser(@Named("email") String email, @Named("auth") String auth) {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		User u = new User(email, auth);
+		
+		if(u != null) {
+			Entity user = new Entity("UserCloud");
+			user.setProperty("listFollowers", null);
+	  		user.setProperty("pseudo",u.getNickname());
+	  		datastore.put(user);
+	  		return u;
+		}else {
+			return null;
+			
+		}
+	}
+	
+	@ApiMethod(
+	        path = "user/signPet",
+	        httpMethod = HttpMethod.POST
+	    )
+	public UserPetition signPet(@Named("user") String user, @Named("petition") String petitions) {
+		
+		UserPetition uc = this.getUserPet(user);
+		ArrayList<String> list = uc.getListPetitions();
+		if(list == null) {
+			list = new ArrayList<>();
+		}
+		if(!list.contains(petitions)) {
+			list.add(petitions);
+		}
+		uc.setListPetitions(list);
+	
+		Entity u;
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		List<Entity> results = queryForge(datastore, user);
+	
+		if(results.size()>0) {
+			u = results.get(0);
+			u.setProperty("listPetitions", uc.getListPetitions());
+	  		u.setProperty("pseudo",uc.getName());
+	  		datastore.put(u);
+	  		return uc;
+		} else {
+			return null;
+		}
+	}
+}
