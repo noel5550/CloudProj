@@ -9,11 +9,13 @@ public class Petition implements java.io.Serializable {
 	String contenu;
 	Key owner;
 	Date date;
+	int signatures;
 	
 	public Petition () {
 		this.contenu = "";
 		this.owner = null;
 		this.date = null;
+		signatures = 0;
 	}
 	
 	public Petition (String contenu, Key cle) {
@@ -31,6 +33,14 @@ public class Petition implements java.io.Serializable {
 
 	public Key getParent() {
 		return owner;
+	}
+	
+	public int getSignatures() {
+		return signatures;
+	}
+	
+	public void setSignatures(int sig) {
+		this.signatures = sig;
 	}
 
 	public void setParent(Key parent) {

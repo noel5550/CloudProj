@@ -25,54 +25,58 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 @Api(name = "cloud")
 public class PetitionEndpoint {
 	
-	@ApiMethod(
-	        path = "msg/gethashtag/{hashtag}/{limit}",
-	        httpMethod = HttpMethod.GET
-	    )
-	public ArrayList<Petition> getMessageHashtag(@Named("hashtag") String hashtag,@Named("limit") Integer limit){
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		ArrayList<Petition> list = new ArrayList<>();
+//	@ApiMethod(
+//	        path = "msg/gethashtag/{hashtag}/{limit}",
+//	        httpMethod = HttpMethod.GET
+//	    )
+//	public ArrayList<Petition> getMessageHashtag(@Named("hashtag") String hashtag,@Named("limit") Integer limit){
+//		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+//		ArrayList<Petition> list = new ArrayList<>();
+//        
+//		Filter pf = new FilterPredicate("Hashtag", FilterOperator.EQUAL, hashtag);
+//		Query q = new Query("MessageData").setFilter(pf).addSort("Date", SortDirection.DESCENDING);
+//		q.setKeysOnly();
+//
+//		PreparedQuery pq = datastore.prepare(q);
+//		
+//		List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(limit));
+//		for (Entity r : results) {
+//			try {
+//				Entity e = datastore.get(r.getParent());
+//				Petition m = new Petition();
+//				m.setContenu(e.getProperty("contenu").toString());
+//				m.setDate((Date)e.getProperty("date"));
+//				m.setParent(e.getParent());
+//				list.add(m);
+//			} catch (EntityNotFoundException e) {
+//				return null;
+//			}
+//		}
+//		return list;
+//	}
+	
+	public List<Entity> queryForge(DatastoreService datastore, String pseudo){
         
-		Filter pf = new FilterPredicate("Hashtag", FilterOperator.EQUAL, hashtag);
-		Query q = new Query("MessageData").setFilter(pf).addSort("Date", SortDirection.DESCENDING);
+		Filter filter = new FilterPredicate("pseudo", FilterOperator.EQUAL, pseudo);
+		Query query = new Query("UserCloud").setFilter(filter);
 		q.setKeysOnly();
-
-		PreparedQuery pq = datastore.prepare(q);
+		PreparedQuery prepQuery = datastore.prepare(query);
+		List<Entity> results = prepQuery.asList(FetchOptions.Builder.withDefaults());
 		
-		List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(limit));
-		for (Entity r : results) {
-			try {
-				Entity e = datastore.get(r.getParent());
-				Petition m = new Petition();
-				m.setContenu(e.getProperty("contenu").toString());
-				m.setDate((Date)e.getProperty("date"));
-				m.setParent(e.getParent());
-				list.add(m);
-			} catch (EntityNotFoundException e) {
-				return null;
-			}
-		}
-		return list;
+		return results;
+		
 	}
 	
 	@ApiMethod(
-	        path = "msg/getuser/{pseudo}/{limit}",
+	        path = "petition/getuser/{pseudo}/{limit}",
 	        httpMethod = HttpMethod.GET
 	    )
-	public ArrayList<Petition> getMessageFollow(@Named("pseudo") String pseudo,@Named("limit") Integer limit){
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		ArrayList<Petition> list = new ArrayList<>();
-        
-		Filter pf = new FilterPredicate("Followers", FilterOperator.EQUAL, pseudo);
-		Query q = new Query("MessageData").setFilter(pf).addSort("Date", SortDirection.DESCENDING);
-		q.setKeysOnly();
-
-		PreparedQuery pq = datastore.prepare(q);
-		
-		List<Entity> results = pq.asList(FetchOptions.Builder.withLimit(limit));
+	public ArrayList<Petition> getPetitionFollow(@Named("pseudo") String pseudo,@Named("limit") Integer limit){
+		DatastoreService Store = DatastoreServiceFactory.getDatastoreService();
+		List<Entity> results = queryForge(store, pseudo);
 		for (Entity r : results) {
 			try {
-				Entity e = datastore.get(r.getParent());
+				Entity e = Store.get(r.getParent());
 				Petition m = new Petition();
 				m.setContenu(e.getProperty("contenu").toString());
 				m.setDate((Date)e.getProperty("date"));
@@ -86,33 +90,26 @@ public class PetitionEndpoint {
 	}
 
 	@ApiMethod(
-	        path = "msg/create",
+	        path = "petition/create",
 	        httpMethod = HttpMethod.POST
 	    )
-	public void createMessage(
-			@Named("owner") String pseudo, 
-			@Named("contenu") String contenu,
-			@Named("cleImage") String cleImage,
-			@Named("urlImage") String urlImage) {
+	public void createMessage(@Named("owner") String pseudo, @Named("contenu") String contenu,) {
 		Date d = new Date();
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		UserPetitionEndpoint ue = new UserPetitionEndpoint();
 		
 		Key keyUser = KeyFactory.createKey("User", pseudo);
-		Entity m = new Entity("Message", keyUser);
+		Entity m = new Entity("Petition", keyUser);
 		
 		m.setProperty("contenu",contenu);
 		m.setProperty("date",d);
-		if(cleImage != null) {
-			m.setProperty("cleImage",cleImage);
-			m.setProperty("urlImage",urlImage);
-		}
+		m.setProperty("signatures",0);
 		datastore.put(m);
 		
-		Entity md = new Entity("MessageData", m.getKey());
+		Entity md = new Entity("PetitionData", m.getKey());
 		
 		UserPetition u = ue.getUserPet(pseudo);
-		md.setProperty("Followers",u.getListPetitions());
+		md.setProperty("Creator",u.getName());
 		md.setProperty("Date",d);
 		datastore.put(md);
 	}
