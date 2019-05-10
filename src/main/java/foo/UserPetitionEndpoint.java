@@ -100,7 +100,7 @@ public class UserPetitionEndpoint {
 		}
 		if(!list.contains(petitions)) {
 			list.add(petitions);
-			//IL FAUT RECUPERER LA PETITION ET INCREMENTER SON SIGNATURE
+			//IL FAUT RECUPERER LA PETITION ET INCREMENTER SON SIGNATURE!!
 			Entity pet;
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			Filter filter = new FilterPredicate("petition", FilterOperator.EQUAL, pseudo);
