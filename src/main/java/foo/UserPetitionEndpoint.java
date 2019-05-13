@@ -36,8 +36,7 @@ public class UserPetitionEndpoint {
 	}
 	
 	
-	public List<Entity> queryForge(DatastoreService datastore, String pseudo){
-		        
+	public List<Entity> queryForge(DatastoreService datastore, String pseudo){		        
 		Filter filter = new FilterPredicate("pseudo", FilterOperator.EQUAL, pseudo);
 		Query query = new Query("UserCloud").setFilter(filter);
 		PreparedQuery prepQuery = datastore.prepare(query);

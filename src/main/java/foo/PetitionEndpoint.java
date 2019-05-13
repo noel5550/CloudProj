@@ -59,7 +59,7 @@ public class PetitionEndpoint {
         
 		Filter filter = new FilterPredicate("pseudo", FilterOperator.EQUAL, pseudo);
 		Query query = new Query("UserCloud").setFilter(filter);
-		q.setKeysOnly();
+		query.setKeysOnly();
 		PreparedQuery prepQuery = datastore.prepare(query);
 		List<Entity> results = prepQuery.asList(FetchOptions.Builder.withDefaults());
 		
@@ -67,6 +67,19 @@ public class PetitionEndpoint {
 		
 	}
 	
+	@ApiMethod(
+		name="topTenPet", 
+		path = "petition/topten", 
+		httpMethod=HttpMethod.GET
+	)
+	public list<Entity> topTenPet(){
+		DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+		Query query = new Query("Petition").addSort("signatures", Query.SortDirection.DESCENDING); 
+		PreparedQuery pq = store.prepare(query);
+		return pq.asList(FetchOptions.Builder.withLimit(100));
+
+	}
+
 	@ApiMethod(
 	        path = "petition/getuser/{pseudo}/{limit}",
 	        httpMethod = HttpMethod.GET
@@ -89,28 +102,62 @@ public class PetitionEndpoint {
 		return list;
 	}
 
+	// @ApiMethod(
+	//         path = "petition/create",
+	//         httpMethod = HttpMethod.POST
+	//     )
+	// public void createMessage(@Named("owner") String pseudo, @Named("contenu") String contenu,) {
+	// 	Date d = new Date();
+	// 	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	// 	UserPetitionEndpoint ue = new UserPetitionEndpoint();
+		
+	// 	Key keyUser = KeyFactory.createKey("User", pseudo);
+	// 	Entity m = new Entity("Petition", keyUser);
+		
+	// 	m.setProperty("contenu",contenu);
+	// 	m.setProperty("date",d);
+	// 	m.setProperty("signatures",0);
+	// 	datastore.put(m);
+		
+	// 	Entity md = new Entity("PetitionData", m.getKey());
+		
+	// 	UserPetition u = ue.getUserPet(pseudo);
+	// 	md.setProperty("Creator",u.getName());
+	// 	md.setProperty("Date",d);
+	// 	datastore.put(md);
+	// }
+
+
 	@ApiMethod(
-	        path = "petition/create",
-	        httpMethod = HttpMethod.POST
-	    )
-	public void createMessage(@Named("owner") String pseudo, @Named("contenu") String contenu,) {
+		name="newPet", 
+		path="petition/newPet", 
+		httpMethod=HttpMethod.POST
+	)
+	public Entity newPet(@Named("contenu") String contenu, @Named("owner") String owner) {
+		Entity e = new Entity("Petition");
 		Date d = new Date();
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		UserPetitionEndpoint ue = new UserPetitionEndpoint();
+		DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+		e.setProperty("contenu", contenu);
+		e.setProperty("owner", owner);
+		e.setProperty("signatures", 0);
+		e.setProperty("date",d);
+		store.put(e);
+		return e;
 		
-		Key keyUser = KeyFactory.createKey("User", pseudo);
-		Entity m = new Entity("Petition", keyUser);
-		
-		m.setProperty("contenu",contenu);
-		m.setProperty("date",d);
-		m.setProperty("signatures",0);
-		datastore.put(m);
-		
-		Entity md = new Entity("PetitionData", m.getKey());
-		
-		UserPetition u = ue.getUserPet(pseudo);
-		md.setProperty("Creator",u.getName());
-		md.setProperty("Date",d);
-		datastore.put(md);
 	}
+
+	@ApiMethod(
+		name="getAlllPets", 
+		path="petition/getAllPets", 
+		httpMethod=HttpMethod.GET
+	)
+	public List<Entity> getAllPets(){
+		DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+		Query query=new Query("Petition");
+		PreparedQuery pq = datastore.prepare(query);
+		return = pq.asList(FetchOptions.Builder.withDefaults());
+	}
+
+
+
 }
