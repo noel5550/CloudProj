@@ -27,14 +27,6 @@ public class UserPetitionEndpoint {
 	
 	public UserPetitionEndpoint() {}
 	
-	@ApiMethod(
-	        path = "user/get/{email}/{auth}",
-	        httpMethod = HttpMethod.GET
-	    )
-	public User getUser(@Named("email") String email, @Named("auth") String auth) {
-		return new User(email, auth);
-	}
-	
 	
 	public List<Entity> queryForge(DatastoreService datastore, String pseudo){		        
 		Filter filter = new FilterPredicate("pseudo", FilterOperator.EQUAL, pseudo);
