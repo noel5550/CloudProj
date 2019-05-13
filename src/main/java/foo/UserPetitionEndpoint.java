@@ -110,7 +110,6 @@ public class UserPetitionEndpoint {
 				pet = results.get(0);
 				pet.setProperty("listPetitionsSignes", (int)pet.getProperty("listPetitionsSignes")+1);
 		  		datastore.put(pet);
-		  		return uc;
 			} else {
 				return null;
 			}
