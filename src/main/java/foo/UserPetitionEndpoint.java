@@ -3,6 +3,11 @@ package foo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -23,7 +28,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.users.User;
 
 @Api(name = "cloud")
-public class UserPetitionEndpoint {
+public class UserPetitionEndpoint extends HttpServlet {
 	
 	public UserPetitionEndpoint() {}
 	
