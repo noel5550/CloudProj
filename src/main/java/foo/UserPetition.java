@@ -12,11 +12,13 @@ public class UserPetition implements java.io.Serializable {
 	
 	public UserPetition() {
 		listPetitions = new ArrayList<>();
+		listPetitionsSignes = new ArrayList<>();
 	}
 	
-	public UserPetition(String p) {
-		name = p;
+	public UserPetition(String nom) {
+		name = nom;
 		listPetitions = new ArrayList<>();
+		listPetitionsSignes = new ArrayList<>();
 	}
 
 	public ArrayList<String> getListPetitions() {

@@ -27,6 +27,32 @@ public class UserPetitionEndpoint {
 	
 	public UserPetitionEndpoint() {}
 	
+	@Override
+	public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+            Query query = new Query("User").addSort("listPetitions", SortDirection.DESCENDING);
+            List<Entity> results = store.prepare(query).asList(FetchOptions.Builder.withLimit(100));
+
+            this.getServletContext().getRequestDispatcher("../webapp/main.js").forward(req, resp);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	@Override
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) {	
+        try {
+            DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+			UserPetition usr = new UserPetition(req.getParameter("name"));
+            ofy().save().entity(usr);
+            store.put(usr);
+            //resp.sendRedirect("/CreatePetition");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	public List<Entity> queryForge(DatastoreService datastore, String pseudo){		        
 		Filter filter = new FilterPredicate("pseudo", FilterOperator.EQUAL, pseudo);

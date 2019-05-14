@@ -80,6 +80,33 @@ public class PetitionEndpoint {
 
 	}
 
+	@Override
+	public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+            Query query = new Query("Petition").addSort("date", SortDirection.DESCENDING);
+            List<Entity> results = store.prepare(query).asList(FetchOptions.Builder.withLimit(100));
+
+            this.getServletContext().getRequestDispatcher("../webapp/main.js").forward(req, resp);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	@Override
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) {	
+        try {
+            DatastoreService store = DatastoreServiceFactory.getDatastoreService();
+			Petition pet = new Petition(req.getParameter("owner"), req.getParameter("contenu"), new Date());
+            ofy().save().entity(pet);
+            store.put(pet);
+            //resp.sendRedirect("/CreatePetition");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 	@ApiMethod(
 	        path = "petition/getuser/{pseudo}/{limit}",
 	        httpMethod = HttpMethod.GET

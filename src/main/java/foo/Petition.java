@@ -17,6 +17,13 @@ public class Petition implements java.io.Serializable {
 		this.date = null;
 		signatures = 0;
 	}
+
+	public Petition(Key owner, String contenu, Date date){
+		this.owner = owner;
+		this.contenu = contenu;
+		this.date = date;
+		this.signatures = 0;
+	}
 	
 	public Petition (String contenu, Key cle) {
 		this.contenu = contenu;
